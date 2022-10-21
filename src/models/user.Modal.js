@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const GlobalPackages = require('../global-package');
+const jwt = require("jsonwebtoken")
 const schema = mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: [true, 'Name is required.'],
+    },
     email: {
       type: String,
       required: [true, 'Email is required.'],
@@ -9,27 +14,18 @@ const schema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'password is required.'],
+      required: [true, 'Password is required.'],
     },
-    name: {
+    address: {
       type: String,
-      required: [true, 'Name is required.'],
+      required: [true, 'Address is required']
     },
-    account_type: {
-      type: String,
-      default: 'user'
+    image: {
+      type: Buffer,
+      required: true
     },
-    token: {
-      type: String,
-      default: ''
-    },
-    otp: {
-      type: String,
-      default: ''
-    },
-    verified: {
-      type: Boolean,
-      default: false
+    role: {
+      enum: ["admin", "user"]
     },
     login_try: {
       type: Number,
@@ -41,19 +37,20 @@ const schema = mongoose.Schema(
   }
 );
 
-
-
-
 schema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const salt = await GlobalPackages.bcrypt.genSalt(10);
     this.password = await GlobalPackages.bcrypt.hash(this.password, salt);
-    // let oldPass = this.password
-    // const verify = await bcrypt.compare(oldPass, this.password);
   }
   next()
 })
 
-const schemaModal = mongoose.model('user', schema);
+schema.methods.createJWT = function () {
+  return jwt.sign({ userId: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_LIFETIME,
+  })
+}
 
-module.exports = schemaModal;
+const userSchemaModal = mongoose.model('user', schema);
+
+module.exports = userSchemaModal;

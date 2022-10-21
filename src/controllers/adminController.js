@@ -1,52 +1,115 @@
 const globalServices = require("../services/index")
+const adminModal = require("../models/admin.Modal")
+const athlete = require("../models/athlete.Modal")
+const token = require("../models/token.Modal")
+const StatusCodes = require("http-status-codes")
+const GlobalPackages = require('../global-package');
+const bcrypt = require("bcryptjs")
 // *************************************************************************
 module.exports = {
-  // **********************Donation auth***********************************
-  signUp: async (req, res) => {
-    let records = req.body;
-    let emailVerification = await globalServices.admin.findUserByObjects({ email: records.email });
-    if (emailVerification && emailVerification._id && emailVerification.email == records.email) {
-      return globalServices.global.returnResponse(res, 403, true, "Account already exit with this email", {});
-    }
-    records.otp = await globalServices.global.createOtp()
-    let result = await globalServices.admin.signUp(records);
-    if (result && result._id) {
-      let emailResult = await globalServices.email.verifyAccount(result, "admin");
-      if (emailResult) {
-        return globalServices.global.returnResponse(res, 201, false, "Account created successfully.Please check your email to verify your account.", {})
-      } else {
-        return globalServices.global.returnResponse(res, 401, true, "Email sending error.Please try after later.", {})
+  seedAdmin: async (req, res) => {
+    try {
+      let adminData = {
+        name: "raheeb",
+        password: "Money_00",
+        email: "raheeb99@gmail.com",
+        tokens: []
+
       }
-    } else {
-      return globalServices.global.returnResponse(res, 500, true, "Server error while creating account.Please try again after some time..", {})
+      const salt = await GlobalPackages.bcrypt.genSalt(10);
+      let newPassword = await GlobalPackages.bcrypt.hash(adminData.password, salt);
+      adminData = {
+        ...adminData,
+        password: newPassword,
+      }
+
+      let admin = await adminModal.findOne({ email: 'raheeb99@gmail.com' });
+      if (!admin) {
+        let result = await adminModal.findOneAndUpdate({ name: "raheeb" }, adminData, {
+          new: true,
+          upsert: true // Make this update into an upsert
+        });
+        console.log("result", result)
+        return res.send("admin SuccussFullyCreated")
+      }
+      return res.send("admin alreadyExists")
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  login: async (req, res) => {
+    try {
+      const _id = req.body._id;
+      const email = req.body.email;
+      const password = req.body.password;
+      const adminEmail = await adminModal.findOne({ email: email });
+      const passwordMatch = await bcrypt.compare(password, adminEmail.password);
+      console.log("passwordMatch", passwordMatch);
+
+      if (passwordMatch) {
+        const token = await adminEmail.createJWTToken();
+        res.cookie("jwt", token, {
+          expires: new Date(date.now() + 300000),
+          httpOnly: true
+        });
+        console.log(token)
+        res.status(201).send("index")
+      }
+      else {
+        res.send("Invalid Login Details....")
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(400).send("Invalid Credentials..");
+    }
+  },
+  // *************************************************************************
+  createAthlete: async (req, res) => {
+    console.log("start")
+    const { name, email, password, DOB, tokenName, college, sport, nationality, about } = req.body;
+    if (!name || !email || !password || !DOB || !tokenName || !college || !sport || !nationality || !about) {
+      throw new Error("Please provide values")
+    }
+    const athleteAlreadyExists = await athlete.findOne({ email });
+    if (athleteAlreadyExists) {
+      throw new Error("Email Already in use");
+    }
+    const Athlete = await athlete.create({ name, email, password, DOB, tokenName, college, sport, nationality, about });
+    res.sendStatus(StatusCodes.CREATED).json(
+      {
+        Athlete:
+
+        {
+          email: athlete.email,
+          name: athlete.name,
+          DOB: athlete.DOB,
+          tokenName: athlete.tokenName,
+          college: athlete.college,
+          sport: athlete.sport,
+          nationality: athlete.nationality,
+          about: athlete.about
+        }
+      })
+
+  },
+  // *************************************************************************
+  createToken: async (req, res) => {
+    const { name, price, description } = req.body;
+    if (!name || !price || !description) {
+      throw new Error("Please provide values")
+    }
+    else {
+      const saveToken = await token.create({ name, price, description });
+      res.sendStatus(StatusCodes.CREATED);
+
     }
   },
   // **********************************************************************
-  login: async (req, res) => {
-    let records = req.body;
-    let accountResult = await globalServices.admin.findUserByObjects({ email: records.email });
-    if (accountResult && accountResult._id) {
-      let verifyPassword = await globalServices.global.verifyPassword(accountResult.password, records.password);
-      if (verifyPassword && accountResult.login_try < 8) {
-        if (accountResult.verified) {
-          let JwtToken = await globalServices.global.JwtToken({ _id: accountResult._id });
-          let updatedResult = await globalServices.admin.updateUserAccountById(accountResult._id, { token: JwtToken, login_try: 0 });
-          return globalServices.global.returnResponse(res, 200, false, "Login successful.redirecting you to dashboard.", updatedResult)
-        } else {
-          return globalServices.global.returnResponse(res, 401, true, "Your account is not verified.Please reset your account password or see your old email", {})
-        }
-      } else {
-        if (accountResult.login_try >= 8) {
-          let updatedResult = await globalServices.admin.updateUserAccountById(accountResult._id, { verified: false });
-          let loginTryResult = await globalServices.admin.updateLoginHits(accountResult._id);
-          return globalServices.global.returnResponse(res, 401, true, "You have try too many time to login to account.Your account has been blocked.", {})
-        } else {
-          let updatedResult = await globalServices.admin.updateLoginHits(accountResult._id);
-          return globalServices.global.returnResponse(res, 401, true, "Email or password is wrong.", {})
-        }
-      }
-    } else {
-      return globalServices.global.returnResponse(res, 401, true, "Email or password is wrong.", {})
+  UpdateAthlete: async (req, res) => {
+    try {
+
+    } catch (error) {
+      res.send(error)
     }
   },
   // **********************************************************************

@@ -1,3 +1,4 @@
+const { app } = require("../global-package");
 const globalServices = require("../services/index")
 // *************************************************************************
 module.exports = {

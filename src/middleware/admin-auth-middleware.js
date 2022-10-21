@@ -51,6 +51,4 @@ const adminProtectRoute = (req, res, next) => {
 
 }
 
-
-
 module.exports = { adminProtectRoute };

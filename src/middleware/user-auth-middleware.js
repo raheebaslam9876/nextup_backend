@@ -15,7 +15,7 @@ const adminProtectRoute = (req, res, next) => {
               token: false
             })
           }
-          Modals.Admin.findById({ _id: data._id }).then(data => {
+          Modals.user.findById({ _id: data._id }).then(data => {
             if (data && data.token == token) {
               req.jwt_account = data;
               // req.user_folder_path = `${req.user._id}/${moment(new Date()).format("Y/MMM")}`;
@@ -23,7 +23,7 @@ const adminProtectRoute = (req, res, next) => {
             } else {
               return res.status(401).json({
                 success: false,
-                msg: "admin account not found.",
+                msg: "User account not found.",
                 token: false
               })
             }

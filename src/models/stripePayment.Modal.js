@@ -29,7 +29,7 @@ const stripePaymentSchema = mongoose.Schema(
     },
     payment_url: {
       type: String,
-      default: ""
+      default: ''
     },
   },
   {

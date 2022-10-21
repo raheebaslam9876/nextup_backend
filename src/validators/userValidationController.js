@@ -9,10 +9,7 @@ module.exports = {
         password: yup.string().required("Password is required."),
         name: yup.string().required("Name is required."),
       }),
-      // params: yup.object({
-      // }),
-      // query: yup.object({
-      // }),
+
     }).validate({
       body: req.body,
       query: req.query,
@@ -30,10 +27,6 @@ module.exports = {
         otp: yup.string().required("Otp is  required"),
         password: yup.string().required("Password is  required").min(8, "Password length is to short"),
       }),
-      // params: yup.object({
-      // }),
-      // query: yup.object({
-      // }),
     }).validate({
       body: req.body,
       query: req.query,

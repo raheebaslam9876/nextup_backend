@@ -7,8 +7,7 @@ module.exports = {
       body: yup.object().shape({
         email: yup.string().required("Email is  required").email("Email is not valid."),
         password: yup.string().required("Password is required."),
-        name: yup.string().required("Account name is required."),
-        organization_name: yup.string().required("Organization name is required."),
+        name: yup.string().required("Account name is required.")
       }),
       // params: yup.object({
       // }),
@@ -90,32 +89,6 @@ module.exports = {
         email: yup.string().required("Email address id is  required").email("Email is not valid."),
         password: yup.string().required("Password is required."),
       }),
-      // params: yup.object({
-      // }),
-      // query: yup.object({
-      // }),
-    }).validate({
-      body: req.body,
-      query: req.query,
-      params: req.params,
-    }, { abortEarly: false }).then(data => {
-      return next();
-    }).catch(error => {
-      globalServices.returnResponse(res, 403, true, "Validation error", error.errors)
-    })
-  },
-  // ***************Donation validation*************************
-  createDonationItem: async (req, res, next) => {
-    yup.object({
-      body: yup.object().shape({
-        donation_title: yup.string().required("Donation title is  required"),
-        donation_description: yup.string().required("Donation description is  required"),
-        donation_amount: yup.number().typeError("Donation amount should be number").required("Donation amount is  required"),
-      }),
-      // params: yup.object({
-      // }),
-      // query: yup.object({
-      // }),
     }).validate({
       body: req.body,
       query: req.query,
