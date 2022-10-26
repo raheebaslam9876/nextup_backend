@@ -5,6 +5,8 @@ const athleteController = require("../../controllers/athleteController")
 
 // ******************************************** 
 router.post('/createNFT', athleteController.createNFT);
-
-
+router.post('/login', athleteController.login);
+router.get('/viewToken', athleteController.viewToken);
+router.get('/viewNFT', athleteController.viewNFT);
+router.patch('/updateProfile', athleteController.UpdateProfile);
 module.exports = router;

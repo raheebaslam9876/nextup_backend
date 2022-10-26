@@ -4,12 +4,13 @@ const userValidateController = require("../../validators/userValidationControlle
 const userController = require('../../controllers/userController')
 
 // ******************************************** 
+router.get('/viewNFT', userController.viewNFT);
 router.post('/signUp', userValidateController.create_account, userController.signUp);
 router.post('/login', userValidateController.login, userController.login);
+router.patch('/change-password', userController.changePassword);
 router.post('/reset-password', userValidateController.resetPassword, userController.resetPassword);
 router.post('/verify-otp', userValidateController.verifyOpt, userController.verifyOpt);
 router.post('/update-password-otp', userValidateController.updatePasswordByLink, userController.updatePasswordByLink);
 router.post('/verify-account', userValidateController.verifyOpt, userController.verifyAccount);
-
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const path = require("path");
+const cookieParser = require("cookie-parser");
 require("dotenv").config({
   path: path.join(__dirname, `.env.${process.env.NODE_ENV}`),
 });
@@ -25,7 +26,7 @@ var server = Packages.app.listen(process.env.PORT || 8070);
 // });
 // **************************************************************************
 // origin: {["http://localhost:3001", "http://localhost:3000"], credentials: true, methods: "GET,HEAD,PUT,PATCH,POST,DELETE", })
-
+Packages.app.use(cookieParser());
 Packages.app.use(Packages.cors({ credentials: true }));
 Packages.app.use(Packages.express.json({ limit: '500mb', type: 'application/json' }));
 Packages.app.use(Packages.express.urlencoded({ limit: '500mb', extended: true, }));

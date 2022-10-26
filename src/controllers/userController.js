@@ -1,7 +1,36 @@
 const { app } = require("../global-package");
-const globalServices = require("../services/index")
+const globalServices = require("../services/index");
+const userModal = require("../models/user.Modal")
+const nftModal = require("../models/nft.Modal");
+const GlobalPackages = require('../global-package');
 // *************************************************************************
 module.exports = {
+  viewNFT: async (req, res) => {
+    try {
+      const findNFT = await nftModal.find();
+      res.send(findNFT)
+    } catch (e) {
+      res.send(e)
+    }
+  },
+  changePassword: async (req, res) => {
+    try {
+      const _id = req.body.id;
+      const password = req.body.password;
+      const salt = await GlobalPackages.bcrypt.genSalt(10);
+      let newPassword = await GlobalPackages.bcrypt.hash(password, salt);
+      const userExist = await userModal.findByIdAndUpdate({ _id: _id }, { $set: { password: newPassword } });
+      if (userExist) {
+        res.status(201).send({ success: true, msg: "Password changed Successfully" });
+      }
+      else {
+        res.status(400).send("User not Exists");
+      }
+    } catch (error) {
+      res.send(error)
+    }
+  },
+
   signUp: async (req, res) => {
     let records = req.body;
     let emailVerification = await globalServices.user.findUserByObjects({ email: records.email });

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const GlobalPackages = require('../global-package');
+const jwt = require("jsonwebtoken")
 const schema = mongoose.Schema({
     name: {
         type: String,
@@ -39,7 +40,18 @@ const schema = mongoose.Schema({
     },
     image: {
         type: Buffer
-    }
+    },
+    NFT: {
+        type: String,
+    },
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true
+            }
+        }
+    ]
 
 });
 
@@ -50,6 +62,18 @@ schema.pre("save", async function (next) {
     }
     next()
 })
+schema.methods.createJWTToken = async function () {
+    try {
+        const token = await jwt.sign({ _id: this._id.toString() }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME });
+        this.tokens = [{ token }];
+        await this.save()
+        return token;
+        // // const userVerify = jwt.verify(token, process.env.JWT_SECRET);
+        // // console.log(userVerify);
+    } catch (error) {
+        console.log("error MODAL LOGs", error)
+    }
+}
 
 const athleteSchemaModal = mongoose.model('athlete', schema);
 module.exports = athleteSchemaModal;

@@ -7,15 +7,16 @@
     "server:local": "export NODE_ENV=local && nodemon ./server",
     "server:dev": "export NODE_ENV=dev && nodemon ./server",
     "server:prod": "export NODE_ENV=prod && node ./server",
-    "start":"nodemon ./server"
+    "start": "nodemon ./server"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "date-diff": "^1.0.2", 
+    "date-diff": "^1.0.2",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "http-status-codes": "^2.2.0",
