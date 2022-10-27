@@ -38,6 +38,7 @@ module.exports = {
       console.log(error)
     }
   },
+  // *************************************************************************
   login: async (req, res) => {
     try {
       const _id = req.body._id;
@@ -48,7 +49,6 @@ module.exports = {
       console.log("passwordMatch", passwordMatch);
 
       if (passwordMatch) {
-
         const token = await adminEmail.createJWTToken();
         res.cookie("jwt", token, {
           expires: new Date(Date.now() + 300000),
@@ -80,7 +80,6 @@ module.exports = {
     res.sendStatus(StatusCodes.CREATED).json(
       {
         Athlete:
-
         {
           email: athlete.email,
           name: athlete.name,
@@ -94,6 +93,7 @@ module.exports = {
       })
 
   },
+  // *************************************************************************
   viewAthlete: async (req, res) => {
     try {
       const Athlete = await athlete.find();
@@ -114,6 +114,7 @@ module.exports = {
 
     }
   },
+  // *************************************************************************
   viewToken: async (req, res) => {
     try {
       const tokenData = await token.find();
@@ -122,6 +123,7 @@ module.exports = {
       res.send(error);
     }
   },
+  // *************************************************************************
   deleteToken: async (req, res) => {
     try {
       const _id = req.params.id;
@@ -139,13 +141,26 @@ module.exports = {
   // **********************************************************************
   UpdateAthlete: async (req, res) => {
     try {
-      const _id = req.params.id;
-      const athleteUpdate = await athlete.updateMany({ _id: _id }, { name: "ali", email: "raheeb99@gmail.com" });
-      if (!athleteUpdate) {
-        return res.status(400).send(deleteAthlete);
+      const _id = req.body._id;
+      const name = req.body.name;
+      const email = req.body.email;
+      const password = req.body.password;
+      const DOB = req.body.DOB;
+      const tokenName = req.body.tokenName;
+      const college = req.body.college;
+      const sport = req.body.sport;
+      const nationality = req.body.nationality;
+      const about = req.body.about;
+      const image = req.body.image;
+      const NFT = req.body.NFT;
+      const findAthlete = await athlete.findOne({ _id: _id });
+      console.log(findAthlete);
+      if (findAthlete) {
+        const athleteUpdate = await athlete.findByIdAndUpdate({ _id: _id }, { name: name, email: email, password: password, DOB: DOB, tokenName: tokenName, college: college, sport: sport, nationality: nationality, about: about, image: image, NFT: NFT });
+        return res.status(201).send({ success: true, msg: "Profile updated Successfully" });
       }
       else {
-        res.send(athleteUpdate)
+        return res.status(200).send({ success: false, msg: "Id is Invalid" });
       }
     } catch (error) {
       res.send(error)
@@ -154,7 +169,7 @@ module.exports = {
   // **********************************************************************
   DeleteAthlete: async (req, res) => {
     try {
-      const _id = req.params.id;
+      const _id = req.body._id;
       const deleteAthlete = await athlete.findByIdAndDelete({ _id: _id })
       if (!deleteAthlete) {
         return res.status(400).send(deleteAthlete);
@@ -165,7 +180,24 @@ module.exports = {
     } catch (e) {
       res.send(e)
     }
-
+  },
+  // *************************************************************************
+  changePassword: async (req, res) => {
+    try {
+      const _id = req.body.id;
+      const password = req.body.password;
+      const salt = await GlobalPackages.bcrypt.genSalt(10);
+      let newPassword = await GlobalPackages.bcrypt.hash(password, salt);
+      const adminExist = await adminModal.findByIdAndUpdate({ _id: _id }, { $set: { password: newPassword } });
+      if (adminExist) {
+        res.status(201).send({ success: true, msg: "Password changed Successfully" });
+      }
+      else {
+        res.status(400).send("Admin does not Exists");
+      }
+    } catch (error) {
+      res.send(error)
+    }
   },
   // **********************************************************************
   updatePasswordByLink: async (req, res) => {

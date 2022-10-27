@@ -2,6 +2,7 @@ const athlete = require("../models/athlete.Modal")
 const nftModal = require("../models/nft.Modal")
 const token = require("../models/token.Modal")
 const bcrypt = require("bcryptjs")
+const GlobalPackages = require('../global-package');
 module.exports = {
     createNFT: async (req, res) => {
         const { name, price, description, image } = req.body;
@@ -47,12 +48,21 @@ module.exports = {
     },
     UpdateProfile: async (req, res) => {
         try {
-            const _id = req.body.id;
+            const _id = req.body._id;
             const name = req.body.name;
             const email = req.body.email;
-            const updateProfile = await athlete.findByIdAndUpdate({ _id: _id }, { $set: { name: name, email: email } });
-            if (!updateProfile) {
-                return res.status(400).send("Athlete not found");
+            const password = req.body.password;
+            const DOB = req.body.DOB;
+            const tokenName = req.body.tokenName;
+            const college = req.body.college;
+            const sport = req.body.sport;
+            const nationality = req.body.nationality;
+            const about = req.body.about;
+            const image = req.body.image;
+            const NFT = req.body.NFT;
+            const athleteUpdate = await athlete.findByIdAndUpdate({ _id: _id }, { name: name, email: email, password: password, DOB: DOB, tokenName: tokenName, college: college, sport: sport, nationality: nationality, about: about, image: image, NFT: NFT });
+            if (!athleteUpdate) {
+                return res.status(400).send(deleteAthlete);
             }
             else {
                 res.status(201).send({ success: true, msg: "Profile updated Successfully" })
@@ -61,6 +71,24 @@ module.exports = {
             res.send(error)
         }
     },
+    changePassword: async (req, res) => {
+        try {
+            const _id = req.body.id;
+            const password = req.body.password;
+            const salt = await GlobalPackages.bcrypt.genSalt(10);
+            let newPassword = await GlobalPackages.bcrypt.hash(password, salt);
+            const athleteExist = await athlete.findByIdAndUpdate({ _id: _id }, { $set: { password: newPassword } });
+            if (athleteExist) {
+                res.status(201).send({ success: true, msg: "Password changed Successfully" });
+            }
+            else {
+                res.status(400).send("Profile does not Exists");
+            }
+        } catch (error) {
+            res.send(error)
+        }
+    },
+
     viewToken: async (req, res) => {
         try {
             const tokenData = await token.find();
